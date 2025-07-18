@@ -11,7 +11,7 @@ import bcrypt from 'bcrypt';
 import { sequelize, Op } from './config/database';
 import { DataTypes, Model } from 'sequelize';
 import { register, login, logout, updateProfile } from './controllers/userController';
-// Modelos com tipagem
+// Modelos com tipagemm
 interface UserAttributes {
   id?: number;
   username: string;
