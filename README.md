@@ -1,7 +1,6 @@
 # NoticiasMogi
 
-Portal de Notícias de Mogi Guaçu e Mogi Mirim
-Projeto aplicação web com Node.js, Express e TypeScript.
+Portal de Notícias de Mogi Guaçu e Mogi Mirim.
 
 ## 📖 Índice
 
