@@ -11,7 +11,6 @@ Portal de Notícias de Mogi Guaçu e Mogi Mirim.
 - [🗂️ Estrutura do Projeto](#️-estrutura-do-projeto)
 - [💾 Banco de Dados](#-banco-de-dados)
 - [🔑 Variáveis de Ambiente](#-variáveis-de-ambiente)
-- [📄 Licença](#-licença)
 
 ## ✨ Features
 
