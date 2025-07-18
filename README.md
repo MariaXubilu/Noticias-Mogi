@@ -8,7 +8,6 @@ Portal de Notícias de Mogi Guaçu e Mogi Mirim.
 - [🚀 Começando](#-começando)
 - [⚙️ Scripts NPM](#️-scripts-npm)
 - [💡 Funcionalidades Principais](#-funcionalidades-principais)
-- [🗂️ Estrutura do Projeto](#️-estrutura-do-projeto)
 - [💾 Banco de Dados](#-banco-de-dados)
 - [🔑 Variáveis de Ambiente](#-variáveis-de-ambiente)
 
