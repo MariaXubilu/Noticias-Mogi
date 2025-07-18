@@ -6,7 +6,6 @@ Projeto aplicação web com Node.js, Express e TypeScript.
 ## ✍️ Autores
 
 - **Maria Eduarda Rodrigues Martins**
-- **Paulo Lilli**
 
 ## 📖 Índice
 
