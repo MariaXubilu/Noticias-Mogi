@@ -165,54 +165,6 @@ O sistema oferece uma experiência de gerenciamento de conteúdo visual e integr
 4.  O **administrador**, através do seu perfil ou de links no e-mail, pode **aprovar** ou **rejeitar** a notícia.
 5.  Se aprovada, a notícia fica visível para todos os visitantes no carrossel da página inicial. O autor é notificado por e-mail sobre o status.
 
-## 🗂️ Estrutura do Projeto
-
-NoticiasMogi/
-├── src/                         # Código fonte principal (TypeScript)
-│   ├── config/                  # Configurações do projeto
-│   │   ├── database.ts          # Configuração da conexão com o banco de dados
-│   │   └── config.json          # Configurações adicionais (se necessário)
-│   ├── controllers/             # Lógica das rotas/endpoints
-│   │   └── userController.ts    # Controlador para operações de usuário
-│   ├── middleware/              # Middlewares do Express
-│   │   └── authMiddleware.ts    # Middlewares de autenticação/autorização
-│   ├── models/                  # Modelos de dados (Sequelize)
-│   │   ├── index.ts             # Centraliza e associa os modelos
-│   │   ├── Card.ts              # Modelo para cards da página inicial
-│   │   ├── Contato.ts           # Modelo para mensagens de contato
-│   │   ├── Noticia.ts           # Modelo para notícias
-│   │   └── userModel.ts         # Modelo para usuários
-│   ├── createAdmin.ts           # Script para criar usuário admin
-│   ├── initDB.ts                # Script para inicializar o banco de dados
-│   └── index.ts                 # Ponto de entrada da aplicação (servidor)
-├── public/                      # Arquivos estáticos
-│   ├── js/                      # JavaScript do cliente
-│   │   └── main.js              # Script principal do front-end
-│   ├── images/                  # Imagens do site
-│   │   └── [todas as imagens]   # Imagens padrão do sistema
-│   ├── css/                     # Folhas de estilo
-│   │   └── style.css            # CSS principal
-│   └── uploads/                 # Arquivos enviados pelos usuários
-│       └── [arquivos enviados]  # Imagens de perfil/notícias
-├── views/                       # Templates EJS
-│   ├── partials/                # Componentes reutilizáveis
-│   │   ├── header.ejs           # Cabeçalho das páginas
-│   │   ├── navbar.ejs           # Barra de navegação
-│   │   └── footer.ejs           # Rodapé
-│   ├── admin/                   # Painel administrativo
-│   │   └── editCards.ejs        # Edição de cards da página inicial
-│   ├── perfil.ejs               # Página de perfil do usuário
-│   ├── login.ejs                # Página de login
-│   ├── cadastro.ejs             # Página de cadastro
-│   ├── 404.ejs                  # Página de erro 404
-│   └── index.ejs                # Página inicial
-├── dist/                        # Código compilado (JavaScript)
-│   └── [arquivos .js]           # Gerado automaticamente pelo TypeScript
-├── package.json                 # Configuração do projeto e dependências
-├── tsconfig.json                # Configuração do TypeScript
-└── .env                         # Variáveis de ambiente
-└── README.md
-
 ### Detalhes da Estrutura
 *   **`src/index.ts`**: É o coração da aplicação. Ele inicializa o Express, configura todos os middlewares, define os modelos do Sequelize e, crucialmente, **contém todas as rotas da aplicação**.
 +    > **Nota**: Idealmente, as rotas seriam separadas em um diretório `src/routes` para melhor organização. No entanto, para simplificar o desenvolvimento inicial, elas foram mantidas no `index.ts`.
