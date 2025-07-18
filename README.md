@@ -1,11 +1,7 @@
 # NoticiasMogi
 
-Portal de Notícias de Mogi Guaçu.
+Portal de Notícias de Mogi Guaçu e Mogi Mirim
 Projeto aplicação web com Node.js, Express e TypeScript.
-
-## ✍️ Autores
-
-- **Maria Eduarda Rodrigues Martins**
 
 ## 📖 Índice
 
