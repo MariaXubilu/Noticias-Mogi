@@ -1,0 +1,41 @@
+{
+  "name": "noticiasmogi",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon src/index.ts",
+    "create-admin": "ts-node src/createAdmin.ts",
+    "init-db": "ts-node src/initDB.ts",
+    "build": "tsc",
+    "serve": "node dist/index.js"
+  },
+  "author": "Maria e Paulo",
+  "license": "ISC",
+  "description": "Portal de Notícias de Mogi Guaçu",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.6.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "multer": "^2.0.1",
+    "nodemailer": "^7.0.3",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/body-parser": "^1.19.6",
+    "@types/dotenv": "^8.2.3",
+    "@types/express": "^5.0.3",
+    "@types/express-session": "^1.18.2",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^22.16.0",
+    "@types/nodemailer": "^6.4.17",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,41 @@
+<%- include('partials/header') %>
+
+<% if (typeof success !== 'undefined' && success === 'cadastro') { %>
+    <div id="successToast" class="toast align-items-center text-bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-4" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;">
+        <div class="d-flex">
+        
+        </div>
+    </div>
+    <script>
+        const toast = new bootstrap.Toast(document.getElementById('successToast'), { delay: 2000 });
+        toast.show();
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 2000);
+    </script>
+<% } %>
+
+<div class="container mt-5" style="max-width: 400px;">
+    <div class="card shadow">
+        <div class="card-body">
+            <h3 class="card-title mb-4 text-center">Login</h3>
+            <% if (typeof error !== 'undefined') { %>
+                <div class="alert alert-danger"><%= error %></div>
+            <% } %>
+            <form action="/login" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuário ou E-mail</label>
+                    <input type="text" class="form-control" id="username" name="username" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Senha</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                <div class="text-center mt-3">
+                    Não possui uma conta? <a href="/cadastro" class="fw-bold text-decoration-none">Cadastre-se</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

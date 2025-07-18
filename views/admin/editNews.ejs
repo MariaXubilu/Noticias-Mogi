@@ -1,0 +1,50 @@
+
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container my-5" style="max-width: 800px;">
+    <div class="card shadow">
+        <div class="card-body">
+            <h2 class="mb-4">Editar Notícia</h2>
+            
+            <% if (typeof error !== 'undefined') { %>
+                <div class="alert alert-danger mb-4">
+                    <% if (error === 'atualizar-noticia') { %>
+                        Erro ao atualizar notícia. Por favor, tente novamente.
+                    <% } %>
+                </div>
+            <% } %>
+
+            <form action="/admin/noticias/editar/<%= noticia.id %>" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="titulo" class="form-label">Título</label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" value="<%= noticia.titulo %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="subtitulo" class="form-label">Subtítulo</label>
+                    <input type="text" class="form-control" id="subtitulo" name="subtitulo" value="<%= noticia.subtitulo %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="conteudo" class="form-label">Conteúdo</label>
+                    <textarea class="form-control" id="conteudo" name="conteudo" rows="5" required><%= noticia.conteudo %></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="imagem" class="form-label">Imagem (deixe em branco para manter a atual)</label>
+                    <input type="file" class="form-control" id="imagem" name="imagem" accept="image/*">
+                    <% if (noticia.imagem) { %>
+                        <div class="mt-2">
+                            <img src="<%= noticia.imagem %>" style="max-width: 200px;" class="img-thumbnail">
+                            <p class="text-muted mt-1">Imagem atual</p>
+                        </div>
+                    <% } %>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <a href="/admin/noticias" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

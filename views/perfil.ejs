@@ -1,0 +1,198 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<div class="container my-5" style="max-width: 700px;">
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-4">
+                <img src="<%= user.foto || '/images/noticias3.png' %>" alt="Foto de perfil" class="rounded-circle me-3" style="width: 90px; height: 90px; object-fit: cover;">
+                <div>
+                    <h4 class="mb-1"><%= user.username %></h4>
+                    <div class="text-muted"><%= user.email %></div>
+                    <% if (user.isAdmin) { %>
+                        <span class="badge bg-danger">Administrador</span>
+                    <% } %>
+                </div>
+            </div>
+            <form action="/perfil/atualizar" method="POST" enctype="multipart/form-data" class="mb-3">
+                <div class="mb-3">
+                    <label for="foto" class="form-label">Foto de Perfil</label>
+                    <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
+                </div>
+                <% if (!user.isAdmin) { %>
+                <div class="mb-3">
+                    <label for="biografia" class="form-label">Biografia</label>
+                    <textarea class="form-control" id="biografia" name="biografia" rows="2"><%= user.biografia || '' %></textarea>
+                </div>
+                <% } %>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuário</label>
+                    <input type="text" class="form-control" id="username" name="username" value="<%= user.username %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Nova Senha</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Deixe em branco para não alterar">
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Seção para usuários comuns enviarem notícias -->
+    <% if (!user.isAdmin) { %>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">Escrever uma notícia</h5>
+            <form action="/perfil/noticia" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="titulo" class="form-label">Título da Notícia</label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" required>
+                </div>
+                <div class="mb-3">
+                    <label for="subtitulo" class="form-label">Subtítulo</label>
+                    <input type="text" class="form-control" id="subtitulo" name="subtitulo" required>
+                </div>
+                <div class="mb-3">
+                    <label for="imagem" class="form-label">Imagem</label>
+                    <input type="file" class="form-control" id="imagem" name="imagem" accept="image/*" required>
+                </div>
+                <div class="mb-3">
+                    <label for="conteudo" class="form-label">Conteúdo da Notícia</label>
+                    <textarea class="form-control" id="conteudo" name="conteudo" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Enviar para aprovação</button>
+            </form>
+            <div class="alert alert-info mt-3">
+                Sua notícia será analisada pelo administrador antes de ser publicada no portal.
+            </div>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- Seção para administradores aprovarem notícias -->
+    <% if (user.isAdmin) { %>
+    <div class="card shadow">
+        <div class="card-body">
+            <h5 class="mb-3">Notícias Pendentes de Aprovação</h5>
+            
+            <% if (noticiasPendentes && noticiasPendentes.length > 0) { %>
+                <div class="list-group">
+                    <% noticiasPendentes.forEach(noticia => { %>
+                    <div class="list-group-item mb-3">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1"><%= noticia.titulo %></h6>
+                            <small>Enviada por: <%= noticia.User.username %></small>
+                        </div>
+                        <p class="mb-1"><%= noticia.subtitulo %></p>
+                        <div class="mt-2">
+                            <form action="/noticia/aprovar/<%= noticia.id %>" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-success">Aprovar</button>
+                            </form>
+                            <form action="/noticia/rejeitar/<%= noticia.id %>" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-danger">Rejeitar</button>
+                            </form>
+                            <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#noticiaModal<%= noticia.id %>">Ver Detalhes</a>
+                        </div>
+                    </div>
+
+                    <!-- Modal para visualizar a notícia completa -->
+                    <div class="modal fade" id="noticiaModal<%= noticia.id %>" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title"><%= noticia.titulo %></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <img src="<%= noticia.imagem %>" class="img-fluid mb-3">
+                                    <h6><%= noticia.subtitulo %></h6>
+                                    <p><%= noticia.conteudo %></p>
+                                    <p class="text-muted">Enviada por: <%= noticia.User.username %></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <form action="/noticia/aprovar/<%= noticia.id %>" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-success">Aprovar</button>
+                                    </form>
+                                    <form action="/noticia/rejeitar/<%= noticia.id %>" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-danger">Rejeitar</button>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="alert alert-info">Nenhuma notícia pendente de aprovação.</div>
+            <% } %>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<% if (typeof success !== 'undefined') { %>
+    <% if (success === 'noticia') { %>
+        <div id="successToast" class="toast align-items-center text-bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-4" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Notícia enviada para aprovação com sucesso!
+                </div>
+            </div>
+        </div>
+    <% } else if (success === 'noticia-aprovada') { %>
+        <div id="successToast" class="toast align-items-center text-bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-4" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Notícia aprovada com sucesso!
+                </div>
+            </div>
+        </div>
+    <% } else if (success === 'noticia-rejeitada') { %>
+        <div id="successToast" class="toast align-items-center text-bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-4" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Notícia rejeitada!
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <script>
+        // Mostra o toast de sucesso (apenas um será criado)
+        const successToastEl = document.getElementById('successToast');
+        if (successToastEl) {
+            const successToast = new bootstrap.Toast(successToastEl, { delay: 2000 });
+            successToast.show();
+        }
+    </script>
+<% } %>
+
+<% if (typeof error !== 'undefined') { %>
+    <div id="errorToast" class="toast align-items-center text-bg-danger border-0 position-fixed top-0 start-50 translate-middle-x mt-4" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;">
+        <div class="d-flex">
+            <div class="toast-body">
+                <% if (error === 'aprovar-noticia') { %>
+                    Erro ao aprovar notícia. Por favor, tente novamente.
+                <% } else if (error === 'rejeitar-noticia') { %>
+                    Erro ao rejeitar notícia. Por favor, tente novamente.
+                <% } else if (error === 'noticia-nao-encontrada') { %>
+                    Notícia não encontrada.
+                <% } else if (error === 'noticia') { %>
+                    Erro ao enviar notícia. Por favor, tente novamente.
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mostra o toast de erro
+        const errorToastEl = document.getElementById('errorToast');
+        if (errorToastEl) {
+            const errorToast = new bootstrap.Toast(errorToastEl, { delay: 2000 });
+            errorToast.show();
+        }
+    </script>
+<% } %>
+
+<%- include('partials/footer') %>

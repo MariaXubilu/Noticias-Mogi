@@ -1,0 +1,345 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<body class="<% if (user && user.isAdmin) { %>admin-logged<% } %>">
+    <div class="modal fade" id="contatoModal" tabindex="-1" aria-labelledby="contatoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contatoModalLabel">Fale Conosco</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contactFormModal" action="/salvarcadastro" method="POST">
+                        <div class="mb-3">
+                            <label for="nameModal" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="nameModal" name="nameModal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpfModal" class="form-label">CPF</label>
+                            <input type="text" class="form-control" id="cpfModal" name="cpfModal" required placeholder="000.000.000-00" maxlength="14">
+                            <div id="cpfErrorModal" class="invalid-feedback">CPF inválido</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="emailModal" class="form-label">E-mail</label>
+                            <input type="email" class="form-control" id="emailModal" name="emailModal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="messageModal" class="form-label">Mensagem</label>
+                            <textarea class="form-control" id="messageModal" name="messageModal" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" form="contactFormModal" class="btn btn-primary">Enviar Mensagem</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error === 'card-update') { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            Erro ao atualizar o card.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Cards Dinâmicos -->
+                <% if (cards && cards.length > 0) { %>
+                    <!-- Card Principal (primeiro card) -->
+                    <div class="card mb-4 editable-card" data-card-id="<%= cards[0].id %>">
+                        <img src="<%= cards[0].imagem || '/images/ir.jpeg' %>" class="card-img-top" style="height: 300px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title fs-3"><%= cards[0].titulo %></h5>
+                            <% if (cards[0].conteudo && Array.isArray(cards[0].conteudo)) { %>
+                                <% cards[0].conteudo.forEach(paragrafo => { %>
+                                    <p class="card-text fs-5 mb-3"><%= paragrafo %></p>
+                                <% }); %>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Cards Secundários (em grid 2x3) -->
+                    <div class="row">
+                        <% for (let i = 1; i <= 6 && i < cards.length; i++) { %>
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 editable-card" data-card-id="<%= cards[i].id %>">
+                                    <img src="<%= cards[i].imagem || '/images/default.jpg' %>" class="card-img-top news-image">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><%= cards[i].titulo %></h5>
+                                        <% if (cards[i].conteudo && Array.isArray(cards[i].conteudo) && cards[i].conteudo[0]) { %>
+                                            <p class="card-text d-none d-md-block"><%= cards[i].conteudo[0] %></p>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+
+                        <!-- Preencher com cards padrão se não houver suficientes no banco -->
+                        <% if (cards.length < 7) { %>
+                            <% const defaultCards = [
+                                { id: 2, titulo: "Quem é quem no remake de Vale Tudo que estreia dia 31 na Globo", imagem: "/images/vale.jpg" },
+                                { id: 3, titulo: "Ed Motta comenta briga de Maria Bethânia com equipe durante show", imagem: "/images/ed-motta.jfif" },
+                                { id: 4, titulo: "Astronautas 'presos' no espaço começam volta à Terra; processo leva 17 horas", imagem: "/images/astro.jpg" },
+                                { id: 5, titulo: "Trump e Putin devem discutir proposta de cessar-fogo", imagem: "/images/trump.jpg" },
+                                { id: 6, titulo: "Bolsa Família 2025: pagamentos de março começam nesta terça", imagem: "/images/bolsa.jpg" },
+                                { id: 7, titulo: "Biólogo lança livro que desdobra a conexão entre flores e beija-flores", imagem: "/images/beija-flor.jpg" }
+                            ]; %>
+                            
+                            <% for (let i = cards.length; i <= 6; i++) { %>
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100 editable-card" data-card-id="<%= defaultCards[i-1].id %>">
+                                        <img src="<%= defaultCards[i-1].imagem %>" class="card-img-top news-image">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><%= defaultCards[i-1].titulo %></h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% } %>
+                    </div>
+                <% } else { %>
+                    <!-- Fallback - Cards padrão quando não há dados no banco -->
+                    <div class="card mb-4 editable-card" data-card-id="1">
+                        <img src="/images/ir.jpeg" class="card-img-top" style="height: 300px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title fs-3">Governo envia ao Congresso projeto do IR</h5>  
+                            <p class="card-text fs-5 mb-3">Isenção do Imposto de Renda é para quem ganha até R$ 5.000 por mês.</p>  
+                            <p class="card-text fs-5 mb-3">Proposta é uma das prioridades do governo em 2025.</p> 
+                            <p class="card-text fs-5">Impacto no orçamento da União é de R$ 27 bilhões por ano.</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 editable-card" data-card-id="2">
+                                <img src="/images/vale.jpg" class="card-img-top news-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Quem é quem no remake de Vale Tudo que estreia dia 31 na Globo</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 editable-card" data-card-id="3">
+                                <img src="/images/ed-motta.jfif" class="card-img-top news-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Ed Motta comenta briga de Maria Bethânia com equipe durante show</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 editable-card" data-card-id="4">
+                                <img src="/images/astro.jpg" class="card-img-top news-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Astronautas 'presos' no espaço começam volta à Terra; processo leva 17 horas</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 editable-card" data-card-id="5">
+                                <img src="/images/trump.jpg" class="card-img-top news-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Trump e Putin devem discutir proposta de cessar-fogo</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 editable-card" data-card-id="6">
+                                <img src="/images/bolsa.jpg" class="card-img-top news-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Bolsa Família 2025: pagamentos de março começam nesta terça</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 editable-card" data-card-id="7">
+                                <img src="/images/beija-flor.jpg" class="card-img-top news-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Biólogo lança livro que desdobra a conexão entre flores e beija-flores</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Carrossel (não editável) -->
+                <div id="newsCarousel" class="carousel slide mb-4" data-bs-ride="carousel" data-bs-interval="5000">
+                    <div class="carousel-inner">
+                        <% if (noticiasCarrossel && noticiasCarrossel.length > 0) { %>
+                            <% noticiasCarrossel.forEach((noticia, index) => { %>
+                                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                    <img src="<%= noticia.imagem %>" 
+                                         class="d-block w-100 carousel-img" 
+                                         style="cursor: pointer;"
+                                         data-bs-toggle="modal" 
+                                         data-bs-target="#noticiaModal"
+                                         data-titulo="<%= noticia.titulo %>"
+                                         data-subtitulo="<%= noticia.subtitulo %>"
+                                         data-imagem="<%= noticia.imagem %>"
+                                         data-conteudo="<%= noticia.conteudo %>"
+                                         data-autor="<%= noticia.User ? noticia.User.username : 'Autor desconhecido' %>">
+                                    <div class="carousel-caption">
+                                        <h5><%= noticia.titulo %></h5>
+                                        <p><%= noticia.subtitulo %></p>
+                                    </div>
+                                    <% if (noticia.User) { %>
+                                        <div class="author-info">
+                                            <small>Por: <%= noticia.User.username %></small>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <!-- Fallback para o carrossel enquanto a página recarrega -->
+                            <div class="carousel-item active">
+                                <img src="/images/placeholder.jpg" class="d-block w-100 carousel-img" alt="Carregando">
+                                <div class="carousel-caption d-none d-md-block">
+                                    <h5>Carregando notícias...</h5>
+                                    <p>Por favor, aguarde.</p>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Próximo</span>
+                    </button>
+                </div>
+                
+                <!-- Seção de notícias mais lidas -->
+                <div class="mb-4">
+                    <h5>Notícias Mais Lidas</h5>
+                    <ul class="most-read-news">
+                        <li class="d-flex align-items-center mb-3">
+                            <img src="/images/febre.png" class="me-3" style="width: 80px; height: 60px; object-fit: cover;">
+                            <div>
+                                <a href="#">Febre amarela: Campinas vacina 5,6 mil moradores de porta a porta</a>
+                                <div class="text-muted small">15/03/2025 - 876 visualizações</div>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center mb-3">
+                            <img src="/images/hopi.jpg" class="me-3" style="width: 80px; height: 60px; object-fit: cover;">
+                            <div>
+                                <a href="#">Hopi Hari anuncia festa junina com Banda Eva, Rastapé e mais</a>
+                                <div class="text-muted small">14/03/2025 - 987 visualizações</div>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center mb-3">
+                            <img src="/images/pis.jpg" class="me-3" style="width: 80px; height: 60px; object-fit: cover;">
+                            <div>
+                                <a href="#">Mais de 10 milhões de brasileiros têm dinheiro do antigo PIS-Pasep</a>
+                                <div class="text-muted small">13/03/2025 - 1.532 visualizações</div>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center mb-3">
+                            <img src="/images/bolsonaro.jpg" class="me-3" style="width: 80px; height: 60px; object-fit: cover;">
+                            <div>
+                                <a href="#">Bolsonaro vira réu: o que acontece após o STF aceitar denúncia</a>
+                                <div class="text-muted small">26/03/2025 - 2.876 visualizações</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card de patrocínio -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <img src="/images/bk.jfif" class="card-img-top" style="border-radius: 8px 8px 0 0; max-height: 550px; object-fit: cover;">
+                    <div class="card-body text-center bg-light">
+                        <h6 class="text-uppercase text-muted">Patrocinado</h6>
+                        <h5 class="my-3">Combo Cheeseburger por R$ 15,90</h5>
+                        <a href="#" class="btn btn-outline-danger btn-sm">Saiba mais</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para visualizar notícia completa -->
+    <div class="modal fade" id="noticiaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noticiaModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="" class="img-fluid mb-3" id="noticiaModalImage">
+                    <h6 id="noticiaModalSubtitle"></h6>
+                    <p id="noticiaModalContent"></p>
+                    <p class="text-muted" id="noticiaModalAuthor"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de edição de cards (apenas para admin) -->
+    <% if (user && user.isAdmin) { %>
+    <div class="modal fade" id="editCardModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Card</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editCardForm" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" id="editCardId" name="id">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Imagem Atual</label>
+                            <img id="currentCardImage" src="" class="img-fluid mb-2" style="max-height: 150px;">
+                            <label class="form-label">Nova Imagem (opcional)</label>
+                            <input type="file" class="form-control" name="imagem" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Título</label>
+                            <input type="text" class="form-control" id="editCardTitle" name="titulo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Conteúdo (um parágrafo por linha)</label>
+                            <textarea class="form-control" id="editCardContent" name="conteudo" rows="5" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <% } %>
+
+    <%- include('partials/footer') %>
+
+    <% if (typeof success !== 'undefined' && success === 'login') { %>
+        <div id="successToast" class="toast align-items-center text-bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-4" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Login realizado com sucesso! 
+                </div>
+            </div>
+        </div>
+        <script>
+            const toast = new bootstrap.Toast(document.getElementById('successToast'), { delay: 2000 });
+            toast.show();
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        </script>
+    <% } %>
+</body>

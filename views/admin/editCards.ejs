@@ -1,0 +1,53 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container mt-4">
+    <h2>Editar Cards da Página Inicial</h2>
+    
+    <% if (typeof success !== 'undefined' && success === 'cards-updated') { %>
+        <div class="alert alert-success">Cards atualizados com sucesso!</div>
+    <% } %>
+    
+    <% if (typeof error !== 'undefined' && error === 'cards-update') { %>
+        <div class="alert alert-danger">Erro ao atualizar os cards.</div>
+    <% } %>
+
+    <div class="row">
+        <% cards.forEach((card, index) => { %>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <form action="/admin/cards/update/<%= card.id %>" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="id" value="<%= card.id %>">
+                        
+                        <img src="<%= card.imagem %>" class="card-img-top" style="height: 200px; object-fit: cover;">
+                        
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Nova Imagem (opcional)</label>
+                                <input type="file" class="form-control" name="imagem" accept="image/*">
+                                <small class="text-muted">Deixe em branco para manter a imagem atual</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Título</label>
+                                <input type="text" class="form-control" name="titulo" value="<%= card.titulo %>" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Conteúdo (um parágrafo por linha)</label>
+                                <textarea class="form-control" name="conteudo" rows="5" required><%= card.conteudo.join('\n') %></textarea>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                                <a href="/" class="btn btn-secondary">Voltar</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,46 @@
+<%- include('partials/header') %>
+<body class="cadastro-bg">
+<div class="container mt-5" style="max-width: 500px;">
+    <div class="card shadow">
+        <div class="card-body">
+            <h3 class="card-title mb-4 text-center">Cadastro de Usuário</h3>
+            <% if (typeof error !== 'undefined') { %>
+                <div class="alert alert-danger"><%= error %></div>
+            <% } %>
+            <form action="/cadastro" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuário</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Senha</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
+            </form>
+            <div class="text-center mt-3">
+                Já possui uma conta? <a href="/login" class="fw-bold text-decoration-none">Faça login</a>
+            </div>
+        </div>
+    </div>
+</div>
+<% if (typeof success !== 'undefined' && success) { %>
+    <div id="successToast" class="toast align-items-center text-bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-4 show" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;">
+        <div class="d-flex">
+            <div class="toast-body">
+                Cadastro realizado com sucesso! Redirecionando para login...
+            </div>
+        </div>
+    </div>
+    <script>
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 3000);
+    </script>
+<% } %>
+</body>
+

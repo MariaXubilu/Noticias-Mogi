@@ -1,0 +1,73 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid flex-column px-0">
+        <div class="d-flex w-100 justify-content-between align-items-center px-3 py-2 position-relative"> 
+            <button class="navbar-toggler d-lg-none order-first" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="position-absolute start-50 translate-middle-x">
+                <div class="d-flex align-items-center">
+                    <img src="/images/noticias3.png" alt="Notícias Mogi" width="90px" class="me-2">
+                    <a class="navbar-brand fs-3 m-0" href="/">Notícias Mogi</a>
+                </div>
+            </div>
+            
+            <div class="d-none d-lg-flex ms-auto"> 
+                <!-- Dropdown de Login/Cadastrar -->
+                <% if (user) { %>
+                    <div class="dropdown me-2">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> <%= user.username %>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="/perfil">Perfil</a></li>
+                            <li><a class="dropdown-item" href="/logout">Sair</a></li>
+                        </ul>
+                    </div>
+                <% } else { %>
+                    <div class="dropdown me-2">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="loginDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Entrar
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                            <li><a class="dropdown-item" href="/login">Login</a></li>
+                            <li><a class="dropdown-item" href="/cadastro">Cadastrar</a></li>
+                        </ul>
+                    </div>
+                <% } %>
+                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#contatoModal">
+                    Fale Conosco
+                </button>
+            </div>
+        </div>
+
+        <div class="w-100 border-top navbar-lower-container">
+            <div class="container-fluid px-0">
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <div class="d-lg-none mb-3 px-3">
+                        <div class="d-flex gap-2">
+                            <a href="login.ejs" class="btn btn-outline-primary w-50">Login</a>
+                            <button class="btn btn-outline-secondary w-50" data-bs-toggle="modal" data-bs-target="#contatoModal">
+                                Fale Conosco
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <ul class="navbar-nav mx-auto"> 
+                        <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Política</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Esportes</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Cultura</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Economia</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Tecnologia</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Agronegócio</a></li>
+                       
+                          
+                            
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
