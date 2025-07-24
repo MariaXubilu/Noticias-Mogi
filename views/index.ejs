@@ -65,37 +65,29 @@
 
                     <!-- Cards Secundários (em grid 2x3) -->
                     <div class="row">
-                        <% for (let i = 1; i <= 6 && i < cards.length; i++) { %>
-                            <div class="col-md-6 mb-4">
-                                <div class="card h-100 editable-card" data-card-id="<%= cards[i].id %>">
-                                    <img src="<%= cards[i].imagem || '/images/default.jpg' %>" class="card-img-top news-image">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><%= cards[i].titulo %></h5>
-                                        <% if (cards[i].conteudo && Array.isArray(cards[i].conteudo) && cards[i].conteudo[0]) { %>
-                                            <p class="card-text d-none d-md-block"><%= cards[i].conteudo[0] %></p>
-                                        <% } %>
+                        <% if (cards && cards.length > 1) { %>
+                            <% for (let i = 1; i <= 6 && i < cards.length; i++) { %>
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100 editable-card" data-card-id="<%= cards[i].id %>">
+                                        <img src="<%= cards[i].imagem || '/images/default.jpg' %>" class="card-img-top news-image">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><%= cards[i].titulo %></h5>
+                                            <% if (cards[i].conteudo && Array.isArray(cards[i].conteudo) && cards[i].conteudo[0]) { %>
+                                                <p class="card-text d-none d-md-block"><%= cards[i].conteudo[0] %></p>
+                                            <% } %>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        <% } %>
-
-                        <!-- Preencher com cards padrão se não houver suficientes no banco -->
-                        <% if (cards.length < 7) { %>
-                            <% const defaultCards = [
-                                { id: 2, titulo: "Quem é quem no remake de Vale Tudo que estreia dia 31 na Globo", imagem: "/images/vale.jpg" },
-                                { id: 3, titulo: "Ed Motta comenta briga de Maria Bethânia com equipe durante show", imagem: "/images/ed-motta.jfif" },
-                                { id: 4, titulo: "Astronautas 'presos' no espaço começam volta à Terra; processo leva 17 horas", imagem: "/images/astro.jpg" },
-                                { id: 5, titulo: "Trump e Putin devem discutir proposta de cessar-fogo", imagem: "/images/trump.jpg" },
-                                { id: 6, titulo: "Bolsa Família 2025: pagamentos de março começam nesta terça", imagem: "/images/bolsa.jpg" },
-                                { id: 7, titulo: "Biólogo lança livro que desdobra a conexão entre flores e beija-flores", imagem: "/images/beija-flor.jpg" }
-                            ]; %>
-                            
-                            <% for (let i = cards.length; i <= 6; i++) { %>
+                            <% } %>
+                        <% } else if (categoriaSelecionada) { %>
+                            <% for (let i = 1; i <= 6; i++) { %>
                                 <div class="col-md-6 mb-4">
-                                    <div class="card h-100 editable-card" data-card-id="<%= defaultCards[i-1].id %>">
-                                        <img src="<%= defaultCards[i-1].imagem %>" class="card-img-top news-image">
-                                        <div class="card-body">
-                                            <h5 class="card-title"><%= defaultCards[i-1].titulo %></h5>
+                                    <div class="card h-100 editable-card border-dashed" data-card-id="blank-<%= i %>">
+                                        <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 200px;">
+                                            <p class="text-muted mb-2">Nenhuma notícia para esta categoria.</p>
+                                            <% if (user && user.isAdmin) { %>
+                                                <button class="btn btn-outline-primary btn-sm" onclick="abrirModalNovoCard('<%= categoriaSelecionada %>')">Adicionar notícia</button>
+                                            <% } %>
                                         </div>
                                     </div>
                                 </div>
@@ -289,40 +281,56 @@
 
     <!-- Modal de edição de cards (apenas para admin) -->
     <% if (user && user.isAdmin) { %>
-    <div class="modal fade" id="editCardModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+<div class="modal fade" id="editCardModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editCardForm" method="POST" enctype="multipart/form-data">
+                <input type="hidden" id="editCardId" name="id">
                 <div class="modal-header">
                     <h5 class="modal-title">Editar Card</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="editCardForm" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" id="editCardId" name="id">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Imagem Atual</label>
-                            <img id="currentCardImage" src="" class="img-fluid mb-2" style="max-height: 150px;">
-                            <label class="form-label">Nova Imagem (opcional)</label>
-                            <input type="file" class="form-control" name="imagem" accept="image/*">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Título</label>
-                            <input type="text" class="form-control" id="editCardTitle" name="titulo" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Conteúdo (um parágrafo por linha)</label>
-                            <textarea class="form-control" id="editCardContent" name="conteudo" rows="5" required></textarea>
-                        </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Imagem Atual</label>
+                        <img id="currentCardImage" src="" class="img-fluid mb-2" style="max-height: 150px;">
+                        <label class="form-label">Nova Imagem (opcional)</label>
+                        <input type="file" class="form-control" name="imagem" accept="image/*">
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    <div class="mb-3">
+                        <label class="form-label">Título</label>
+                        <input type="text" class="form-control" id="editCardTitle" name="titulo" required>
                     </div>
-                </form>
-            </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subtítulo</label>
+                        <input type="text" class="form-control" id="editCardSubtitle" name="subtitulo">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Categoria/ID</label>
+                        <select class="form-select" id="editCardCategoria" name="categoria" required>
+                            <option value="">Selecione...</option>
+                            <option value="politica">Política</option>
+                            <option value="esportes">Esportes</option>
+                            <option value="cultura">Cultura</option>
+                            <option value="economia">Economia</option>
+                            <option value="tecnologia">Tecnologia</option>
+                            <option value="agronegocio">Agronegócio</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Conteúdo (um parágrafo por linha)</label>
+                        <textarea class="form-control" id="editCardContent" name="conteudo" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
         </div>
     </div>
-    <% } %>
+</div>
+<% } %>
 
     <%- include('partials/footer') %>
 

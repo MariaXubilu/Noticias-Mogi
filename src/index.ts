@@ -52,6 +52,8 @@ interface CardAttributes {
   imagem: string;
   conteudo: string;
   posicao: number;
+  subtitulo?: string;
+   categoria?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -259,6 +261,8 @@ async function criarNoticiasPadrao() {
 // Rotas Públicas
 app.get("/", async (req: Request, res: Response) => {
     try {
+        const categoria = req.query.categoria as string | undefined;
+
         const noticiasAprovadas = await Noticia.findAll({ 
             where: { status: 'aprovada' },
             include: [{ model: User, as: 'User', attributes: ['username', 'foto'] }],
@@ -266,18 +270,34 @@ app.get("/", async (req: Request, res: Response) => {
             limit: 3
         }) as NoticiaInstance[];
 
-        // Carrega os cards do banco de dados ordenados por posição
-        const cards = await Card.findAll({ 
-            order: [['posicao', 'ASC']],
-            limit: 7 // Limita a 7 cards (1 principal + 6 secundários)
-        });
-
-        // Se não houver cards, cria os padrão
-        if (cards.length === 0) {
-            await criarCardsPadrao();
-            return res.redirect('/');
+        let cards: CardInstance[];
+        if (categoria) {
+            cards = await Card.findAll({
+                where: { categoria },
+                order: [['posicao', 'ASC']],
+                limit: 7
+            });
+        } else {
+            cards = await Card.findAll({
+                order: [['posicao', 'ASC']],
+                limit: 7
+            });
         }
-// Se não houver notícias aprovadas, cria as padrão e recarrega a página
+
+        // Se não houver cards para a categoria, crie os cards padrão em branco
+        if (categoria && cards.length === 0) {
+            await criarCardsPadrao();
+            // Após criar, recarregue os cards da categoria
+            cards = await Card.findAll({
+                where: { categoria },
+                order: [['posicao', 'ASC']],
+                limit: 7
+            });
+            // Se ainda não houver (caso não tenha categoria definida), envie array vazio
+            if (cards.length === 0) cards = [];
+        }
+
+        // Se não houver notícias aprovadas, cria as padrão e recarrega a página
         if (noticiasAprovadas.length === 0) {
             await criarNoticiasPadrao();
             return res.redirect('/');
@@ -285,6 +305,7 @@ app.get("/", async (req: Request, res: Response) => {
         res.render("index", {
             noticiasCarrossel: noticiasAprovadas.map(n => n.get({ plain: true })),
             cards: cards.map(card => card.get({ plain: true })),
+            categoriaSelecionada: categoria,
             success: req.query.success
         });
     } catch (error) {
@@ -299,27 +320,19 @@ app.get("/", async (req: Request, res: Response) => {
 // Função para criar os cards padrão se o banco estiver vazio
 async function criarCardsPadrao() {
     try {
-        const cardsPadrao = [
-            {
-                titulo: 'Governo envia ao Congresso projeto do IR',
-                imagem: '/images/ir.jpeg',
-                conteudo: JSON.stringify([
-                    'Isenção do Imposto de Renda é para quem ganha até R$ 5.000 por mês.',
-                    'Proposta é uma das prioridades do governo em 2025.',
-                    'Impacto no orçamento da União é de R$ 27 bilhões por ano.'
-                ]),
-                posicao: 1
-            },
-            { titulo: 'Quem é quem no remake de Vale Tudo que estreia dia 31 na Globo', imagem: '/images/vale.jpg', conteudo: '[]', posicao: 2 },
-            { titulo: 'Ed Motta comenta briga de Maria Bethânia com equipe durante show', imagem: '/images/ed-motta.jfif', conteudo: '[]', posicao: 3 },
-            { titulo: "Astronautas 'presos' no espaço começam volta à Terra; processo leva 17 horas", imagem: '/images/astro.jpg', conteudo: '[]', posicao: 4 },
-            { titulo: 'Trump e Putin devem discutir proposta de cessar-fogo', imagem: '/images/trump.jpg', conteudo: '[]', posicao: 5 },
-            { titulo: 'Bolsa Família 2025: pagamentos de março começam nesta terça', imagem: '/images/bolsa.jpg', conteudo: '[]', posicao: 6 },
-            { titulo: 'Biólogo lança livro que desdobra a conexão entre flores e beija-flores', imagem: '/images/beija-flor.jpg', conteudo: '[]', posicao: 7 }
-        ];
-
+        const cardsPadrao = [];
+        for (let i = 1; i <= 7; i++) {
+            cardsPadrao.push({
+                titulo: '', // nunca undefined
+                subtitulo: '', // nunca undefined
+                imagem: '',
+                conteudo: '[]',
+                posicao: i,
+                categoria: '' // ou null, se permitido
+            });
+        }
         await Card.bulkCreate(cardsPadrao);
-        console.log('Cards padrão criados com sucesso!');
+        console.log('Cards padrão em branco criados com sucesso!');
     } catch (error) {
         console.error('Erro ao criar cards padrão:', error);
     }
@@ -458,25 +471,33 @@ app.get('/admin/cards/:id', requireLogin, isAdmin, async (req: Request, res: Res
 app.post('/admin/cards/update/:id', requireLogin, isAdmin, upload.single('imagem'), async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { titulo, conteudo } = req.body;
-        
-        // Processa o conteúdo - divide por linhas e remove vazias
-        const conteudoArray = conteudo.split('\n')
-            .filter((p: string) => p.trim() !== '')
-            .map((p: string) => p.trim());
+        const { titulo, subtitulo, conteudo, categoria } = req.body;
+        const conteudoArray = conteudo.split('\n').filter((p: string) => p.trim() !== '');
 
         let updateData: Partial<CardAttributes> = {
             titulo,
-            conteudo: conteudoArray // O setter do modelo vai converter para JSON
+            subtitulo, // agora existe na interface
+            conteudo: JSON.stringify(conteudoArray),
+            categoria
         };
 
         if (req.file) {
             updateData.imagem = '/uploads/' + req.file.filename;
         }
 
-        await Card.update(updateData, {
-            where: { id }
-        });
+        if (id && !id.startsWith('blank')) {
+            await Card.update(updateData, { where: { id } });
+        } else {
+            // Cria novo card se id for vazio ou "blank"
+            await Card.create({
+                titulo: updateData.titulo ?? '',
+                subtitulo: updateData.subtitulo ?? '',
+                imagem: updateData.imagem ?? '',
+                conteudo: updateData.conteudo ?? '[]',
+                posicao: Number(id.replace('blank-', '')) || 1,
+                categoria: updateData.categoria ?? ''
+            });
+        }
 
         res.redirect('/?success=card-updated');
     } catch (error) {

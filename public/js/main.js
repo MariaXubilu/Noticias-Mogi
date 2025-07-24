@@ -207,3 +207,28 @@ if (document.body.classList.contains('admin-logged')) {
         });
     }
 }
+
+function abrirModalNovoCard(categoria) {
+    document.getElementById('editCardId').value = '';
+    document.getElementById('editCardCategoria').value = categoria;
+    document.getElementById('editCardTitle').value = '';
+    document.getElementById('editCardContent').value = '';
+    document.getElementById('currentCardImage').src = '';
+    $('#editCardModal').modal('show');
+}
+
+function abrirModalEditarCard(cardId) {
+    fetch(`/admin/cards/${cardId}`)
+        .then(res => res.json())
+        .then(card => {
+            document.getElementById('editCardId').value = card.id;
+            document.getElementById('editCardTitle').value = card.titulo || '';
+            document.getElementById('editCardSubtitle').value = card.subtitulo || '';
+            document.getElementById('editCardCategoria').value = card.categoria || '';
+            document.getElementById('editCardContent').value = (Array.isArray(card.conteudo) ? card.conteudo.join('\n') : '');
+            document.getElementById('currentCardImage').src = card.imagem || '';
+            document.getElementById('editCardForm').action = `/admin/cards/update/${card.id}`;
+            const modal = new bootstrap.Modal(document.getElementById('editCardModal'));
+            modal.show();
+        });
+}

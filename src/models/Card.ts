@@ -6,6 +6,7 @@ interface CardAttributes {
   imagem: string;
   conteudo: string; // JSON stringify de um array
   posicao: number;
+  categoria?: string; // <-- ADICIONE ESTA LINHA
 }
 
 export default function initCardModel(sequelize: Sequelize, dataTypes: typeof DataTypes) {
@@ -36,6 +37,10 @@ export default function initCardModel(sequelize: Sequelize, dataTypes: typeof Da
         type: dataTypes.INTEGER,
         allowNull: false,
       
+      },
+      categoria: {
+        type: DataTypes.STRING,
+        allowNull: true
       }
     },
     {
