@@ -214,7 +214,10 @@ function abrirModalNovoCard(categoria) {
     document.getElementById('editCardTitle').value = '';
     document.getElementById('editCardContent').value = '';
     document.getElementById('currentCardImage').src = '';
-    $('#editCardModal').modal('show');
+    
+    // Abrir modal usando Bootstrap 5
+    const modal = new bootstrap.Modal(document.getElementById('editCardModal'));
+    modal.show();
 }
 
 function abrirModalEditarCard(cardId) {

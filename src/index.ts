@@ -53,7 +53,7 @@ interface CardAttributes {
   conteudo: string;
   posicao: number;
   subtitulo?: string;
-   categoria?: string;
+   categoria?: string | null; // Categoria pode ser string ou null
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -66,7 +66,7 @@ interface NoticiaInstance extends Model<NoticiaAttributes>, NoticiaAttributes {
 interface ContatoInstance extends Model<ContatoAttributes>, ContatoAttributes {}
 interface CardInstance extends Model<CardAttributes>, CardAttributes {}
 
-// Importar modelos
+// Importar modeloss
 import UserModel from './models/userModel';
 import ContatoModel from './models/Contato';
 import NoticiaModel from './models/Noticia';
@@ -263,6 +263,7 @@ app.get("/", async (req: Request, res: Response) => {
     try {
         const categoria = req.query.categoria as string | undefined;
 
+        // Sempre buscar notícias aprovadas para o carrossel (não afetado por categoria)
         const noticiasAprovadas = await Noticia.findAll({ 
             where: { status: 'aprovada' },
             include: [{ model: User, as: 'User', attributes: ['username', 'foto'] }],
@@ -270,6 +271,7 @@ app.get("/", async (req: Request, res: Response) => {
             limit: 3
         }) as NoticiaInstance[];
 
+        // Buscar cards com ou sem categoria
         let cards: CardInstance[];
         if (categoria) {
             cards = await Card.findAll({
@@ -277,31 +279,53 @@ app.get("/", async (req: Request, res: Response) => {
                 order: [['posicao', 'ASC']],
                 limit: 7
             });
+            
+            // Se não houver cards para a categoria, criar cards em branco apenas para essa categoria
+            if (cards.length === 0) {
+                for (let i = 1; i <= 7; i++) {
+                    await Card.create({
+                        titulo: '',
+                        subtitulo: '',
+                        imagem: '',
+                        conteudo: '[]',
+                        posicao: i,
+                        categoria: categoria
+                    });
+                }
+                // Recarregar os cards após criação
+                cards = await Card.findAll({
+                    where: { categoria },
+                    order: [['posicao', 'ASC']],
+                    limit: 7
+                });
+            }
         } else {
+            // Home sem categoria - buscar cards sem categoria ou padrão
             cards = await Card.findAll({
+                where: {
+                    [Op.or]: [
+                        { categoria: '' },
+                        { categoria: null }
+                    ]
+                },
                 order: [['posicao', 'ASC']],
                 limit: 7
             });
+            
+            // Se não houver cards sem categoria, criar os padrão
+            if (cards.length === 0) {
+                await criarCardsPadrao();
+                cards = await Card.findAll({
+                    where: {
+                        categoria: null
+                    },
+                    order: [['posicao', 'ASC']],
+                    limit: 7
+                });
+            }
         }
 
-        // Se não houver cards para a categoria, crie os cards padrão em branco
-        if (categoria && cards.length === 0) {
-            await criarCardsPadrao();
-            // Após criar, recarregue os cards da categoria
-            cards = await Card.findAll({
-                where: { categoria },
-                order: [['posicao', 'ASC']],
-                limit: 7
-            });
-            // Se ainda não houver (caso não tenha categoria definida), envie array vazio
-            if (cards.length === 0) cards = [];
-        }
-
-        // Se não houver notícias aprovadas, cria as padrão e recarrega a página
-        if (noticiasAprovadas.length === 0) {
-            await criarNoticiasPadrao();
-            return res.redirect('/');
-        }
+        // Renderizar a página
         res.render("index", {
             noticiasCarrossel: noticiasAprovadas.map(n => n.get({ plain: true })),
             cards: cards.map(card => card.get({ plain: true })),
@@ -323,12 +347,12 @@ async function criarCardsPadrao() {
         const cardsPadrao = [];
         for (let i = 1; i <= 7; i++) {
             cardsPadrao.push({
-                titulo: '', // nunca undefined
-                subtitulo: '', // nunca undefined
+                titulo: '',
+                subtitulo: '',
                 imagem: '',
                 conteudo: '[]',
                 posicao: i,
-                categoria: '' // ou null, se permitido
+                categoria: '' // string vazia para home
             });
         }
         await Card.bulkCreate(cardsPadrao);
