@@ -86,7 +86,8 @@
                                         <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 200px;">
                                             <p class="text-muted mb-2">Nenhuma notícia para esta categoria.</p>
                                             <% if (user && user.isAdmin) { %>
-                                                <button class="btn btn-outline-primary btn-sm" onclick="abrirModalNovoCard('<%= categoriaSelecionada %>')">Adicionar notícia</button>
+                                                <!-- Para adicionar card (fluxo atual, correto para cards) -->
+<button class="btn btn-outline-primary btn-sm" onclick="abrirModalNovoCard('<%= categoriaSelecionada %>')">Adicionar notícia</button>
                                             <% } %>
                                         </div>
                                     </div>
@@ -106,60 +107,40 @@
                         </div>
                     </div>
 
+                <% } %>
+
+                <% if (!categoriaSelecionada && cardsAleatorios && cardsAleatorios.length > 0) { %>
+                    <div class="row mb-4">
+                        <% cardsAleatorios.forEach(function(card) { %>
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 editable-card" data-card-id="<%= card.id %>">
+                                    <img src="<%= card.imagem || '/images/default.jpg' %>" class="card-img-top news-image">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><%= card.titulo %></h5>
+                                        <% if (card.conteudo && Array.isArray(card.conteudo) && card.conteudo[0]) { %>
+                                            <p class="card-text d-none d-md-block"><%= card.conteudo[0] %></p>
+                                        <% } %>
+                                        <span class="badge bg-secondary"><%= card.categoria %></span>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else if (categoriaSelecionada) { %>
+                    <!-- Cards em branco editáveis por categoria (NÃO MEXA) -->
                     <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100 editable-card" data-card-id="2">
-                                <img src="/images/vale.jpg" class="card-img-top news-image">
-                                <div class="card-body">
-                                    <h5 class="card-title">Quem é quem no remake de Vale Tudo que estreia dia 31 na Globo</h5>
+                        <% for (let i = 1; i <= 6; i++) { %>
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 editable-card border-dashed" data-card-id="blank-<%= i %>">
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 200px;">
+                                        <p class="text-muted mb-2">Nenhuma notícia para esta categoria.</p>
+                                        <% if (user && user.isAdmin) { %>
+                                            <button class="btn btn-outline-primary btn-sm" onclick="abrirModalNovoCard('<%= categoriaSelecionada %>')">Adicionar notícia</button>
+                                        <% } %>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100 editable-card" data-card-id="3">
-                                <img src="/images/ed-motta.jfif" class="card-img-top news-image">
-                                <div class="card-body">
-                                    <h5 class="card-title">Ed Motta comenta briga de Maria Bethânia com equipe durante show</h5>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100 editable-card" data-card-id="4">
-                                <img src="/images/astro.jpg" class="card-img-top news-image">
-                                <div class="card-body">
-                                    <h5 class="card-title">Astronautas 'presos' no espaço começam volta à Terra; processo leva 17 horas</h5>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100 editable-card" data-card-id="5">
-                                <img src="/images/trump.jpg" class="card-img-top news-image">
-                                <div class="card-body">
-                                    <h5 class="card-title">Trump e Putin devem discutir proposta de cessar-fogo</h5>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100 editable-card" data-card-id="6">
-                                <img src="/images/bolsa.jpg" class="card-img-top news-image">
-                                <div class="card-body">
-                                    <h5 class="card-title">Bolsa Família 2025: pagamentos de março começam nesta terça</h5>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100 editable-card" data-card-id="7">
-                                <img src="/images/beija-flor.jpg" class="card-img-top news-image">
-                                <div class="card-body">
-                                    <h5 class="card-title">Biólogo lança livro que desdobra a conexão entre flores e beija-flores</h5>
-                                </div>
-                            </div>
-                        </div>
+                        <% } %>
                     </div>
                 <% } %>
             </div>

@@ -263,7 +263,7 @@ app.get("/", async (req: Request, res: Response) => {
     try {
         const categoria = req.query.categoria as string | undefined;
 
-        // Sempre buscar notícias aprovadas para o carrossel (não afetado por categoria)
+        // Carrossel (não mexer)
         const noticiasAprovadas = await Noticia.findAll({ 
             where: { status: 'aprovada' },
             include: [{ model: User, as: 'User', attributes: ['username', 'foto'] }],
@@ -271,64 +271,47 @@ app.get("/", async (req: Request, res: Response) => {
             limit: 3
         }) as NoticiaInstance[];
 
-        // Buscar cards com ou sem categoria
-        let cards: CardInstance[];
-        if (categoria) {
+        // Categorias da navbar
+        const categoriasNavbar = [
+            'politica', 'esportes', 'cultura', 'economia', 'tecnologia', 'agronegocio'
+        ];
+
+        let cardsAleatorios: CardInstance[] = [];
+        let cards: CardInstance[] = [];
+
+        if (!categoria) {
+            // Só busca cards aleatórios das categorias
+            for (const cat of categoriasNavbar) {
+                const card = await Card.findOne({
+                    where: { categoria: cat },
+                    order: sequelize.random()
+                }) as CardInstance | null;
+                if (card) cardsAleatorios.push(card);
+            }
+        } else {
+            // Busca normal por categoria
             cards = await Card.findAll({
                 where: { categoria },
                 order: [['posicao', 'ASC']],
                 limit: 7
             });
-            
-            // Se não houver cards para a categoria, criar cards em branco apenas para essa categoria
             if (cards.length === 0) {
-                for (let i = 1; i <= 7; i++) {
-                    await Card.create({
-                        titulo: '',
-                        subtitulo: '',
-                        imagem: '',
-                        conteudo: '[]',
-                        posicao: i,
-                        categoria: categoria
-                    });
-                }
-                // Recarregar os cards após criação
-                cards = await Card.findAll({
-                    where: { categoria },
-                    order: [['posicao', 'ASC']],
-                    limit: 7
+                const novoCard = await Card.create({
+                    titulo: '',
+                    subtitulo: '',
+                    imagem: '',
+                    conteudo: '[]',
+                    posicao: 1,
+                    categoria: categoria
                 });
-            }
-        } else {
-            // Home sem categoria - buscar cards sem categoria ou padrão
-            cards = await Card.findAll({
-                where: {
-                    [Op.or]: [
-                        { categoria: '' },
-                        { categoria: null }
-                    ]
-                },
-                order: [['posicao', 'ASC']],
-                limit: 7
-            });
-            
-            // Se não houver cards sem categoria, criar os padrão
-            if (cards.length === 0) {
-                await criarCardsPadrao();
-                cards = await Card.findAll({
-                    where: {
-                        categoria: null
-                    },
-                    order: [['posicao', 'ASC']],
-                    limit: 7
-                });
+                cards = [novoCard];
             }
         }
 
-        // Renderizar a página
         res.render("index", {
             noticiasCarrossel: noticiasAprovadas.map(n => n.get({ plain: true })),
             cards: cards.map(card => card.get({ plain: true })),
+            cardsAleatorios: cardsAleatorios.map(card => card.get({ plain: true })),
             categoriaSelecionada: categoria,
             success: req.query.success
         });
@@ -336,7 +319,8 @@ app.get("/", async (req: Request, res: Response) => {
         console.error(error);
         res.render("index", { 
             noticiasCarrossel: [],
-            cards: [] 
+            cards: [],
+            cardsAleatorios: []
         });
     }
 });
