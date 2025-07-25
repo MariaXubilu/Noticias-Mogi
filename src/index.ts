@@ -718,7 +718,8 @@ app.use((req: Request, res: Response) => {
 });
 
 // Inicialização do servidor
-sequelize.sync().then(() => {
+sequelize.sync().then(async () => {
+    await criarNoticiasPadrao(); // Garante que as notícias padrão existam
     const server = app.listen(PORT, () => {
         console.log(`Servidor rodando na porta ${PORT}`);
         console.log(`Acesse: http://localhost:${PORT}`);
