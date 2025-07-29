@@ -1,136 +1,118 @@
-// Adicionei verificação se o elemento existe
-const contactForm = document.getElementById('contactFormModal');
-if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
+// Validação do formulário de contato
+const formularioContato = document.getElementById('contactFormModal');
+if (formularioContato) {
+    formularioContato.addEventListener('submit', function(e) {
         e.preventDefault();
-        const cpfInput = document.getElementById('cpfModal');
-        const cpf = cpfInput.value.replace(/[^\d]/g, '');
+        const campoCPF = document.getElementById('cpfModal');
+        const cpf = campoCPF.value.replace(/[^\d]/g, '');
         
         if (validarCPF(cpf)) {
-            cpfInput.classList.remove('is-invalid');
-            this.reset();
+            campoCPF.classList.remove('is-invalid');
+            this.submit(); // Envia o formulário se a validação passar
             
-            // Fechar modal (verificando se Bootstrap está disponível)
+            // Fecha o modal
             if (typeof bootstrap !== 'undefined') {
-                const modalElement = document.getElementById('contatoModal');
-                if (modalElement) {
-                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                    if (modalInstance) {
-                        modalInstance.hide();
+                const modal = document.getElementById('contatoModal');
+                if (modal) {
+                    const instanciaModal = bootstrap.Modal.getInstance(modal);
+                    if (instanciaModal) {
+                        instanciaModal.hide();
                     }
                 }
             }
         } else {
-            cpfInput.classList.add('is-invalid');
+            campoCPF.classList.add('is-invalid');
         }
     });
 }
 
-// Máscara de CPF (com verificação de elemento)
-const cpfInput = document.getElementById('cpfModal');
-if (cpfInput) {
-    cpfInput.addEventListener('input', function(e) {
-        const target = e.target;
-        let value = target.value.replace(/\D/g, '');
+// Máscara para o campo de CPF
+const campoCPF = document.getElementById('cpfModal');
+if (campoCPF) {
+    campoCPF.addEventListener('input', function(e) {
+        const alvo = e.target;
+        let valor = alvo.value.replace(/\D/g, '');
         
-        if (value.length > 3) value = value.replace(/^(\d{3})/, '$1.');
-        if (value.length > 6) value = value.replace(/^(\d{3})\.(\d{3})/, '$1.$2.');
-        if (value.length > 9) value = value.replace(/^(\d{3})\.(\d{3})\.(\d{3})/, '$1.$2.$3-');
-        if (value.length > 14) value = value.substring(0, 14);
+        if (valor.length > 3) valor = valor.replace(/^(\d{3})/, '$1.');
+        if (valor.length > 6) valor = valor.replace(/^(\d{3})\.(\d{3})/, '$1.$2.');
+        if (valor.length > 9) valor = valor.replace(/^(\d{3})\.(\d{3})\.(\d{3})/, '$1.$2.$3-');
+        if (valor.length > 14) valor = valor.substring(0, 14);
         
-        target.value = value;
+        alvo.value = valor;
     });
 }
 
-// Função de validação
-function validarCPF(cpfDigits) {
-    if (cpfDigits.length !== 11) return false;
+// Função para validar CPF
+function validarCPF(cpf) {
+    if (cpf.length !== 11) return false;
 
-    const allEqual = cpfDigits.split('').every(d => d === cpfDigits[0]);
-    if (allEqual) return false;
+    // Verifica se todos os dígitos são iguais
+    const todosIguais = cpf.split('').every(digito => digito === cpf[0]);
+    if (todosIguais) return false;
 
+    // Cálculo do primeiro dígito verificador
     let soma = 0;
     for (let i = 0; i < 9; i++) {
-        soma += parseInt(cpfDigits[i]) * (10 - i);
+        soma += parseInt(cpf[i]) * (10 - i);
     }
-    let dig1 = (soma * 10) % 11;
-    if (dig1 === 10) dig1 = 0;
-    if (dig1 !== parseInt(cpfDigits[9])) return false;
+    let digito1 = (soma * 10) % 11;
+    if (digito1 === 10) digito1 = 0;
+    if (digito1 !== parseInt(cpf[9])) return false;
 
+    // Cálculo do segundo dígito verificador
     soma = 0;
     for (let i = 0; i < 10; i++) {
-        soma += parseInt(cpfDigits[i]) * (11 - i);
+        soma += parseInt(cpf[i]) * (11 - i);
     }
-    let dig2 = (soma * 10) % 11;
-    if (dig2 === 10) dig2 = 0;
+    let digito2 = (soma * 10) % 11;
+    if (digito2 === 10) digito2 = 0;
 
-    return dig2 === parseInt(cpfDigits[10]);
+    return digito2 === parseInt(cpf[10]);
 }
 
-// Modal de notícia do carrossel
+// Inicialização quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', function() {
-    // Configura o modal para exibir a notícia completa
-    const noticiaModal = document.getElementById('noticiaModal');
-    if (noticiaModal) {
-        noticiaModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
+    // Modal de notícia do carrossel
+    const modalNoticia = document.getElementById('noticiaModal');
+    if (modalNoticia) {
+        modalNoticia.addEventListener('show.bs.modal', function(event) {
+            const botao = event.relatedTarget;
             
-            if (button) {
-                const titulo = button.getAttribute('data-titulo');
-                const subtitulo = button.getAttribute('data-subtitulo');
-                const imagem = button.getAttribute('data-imagem');
-                const conteudo = button.getAttribute('data-conteudo');
-                const autor = button.getAttribute('data-autor');
+            if (botao) {
+                // Obtém os dados da notícia
+                const titulo = botao.getAttribute('data-titulo');
+                const subtitulo = botao.getAttribute('data-subtitulo');
+                const imagem = botao.getAttribute('data-imagem');
+                const conteudo = botao.getAttribute('data-conteudo');
+                const autor = botao.getAttribute('data-autor');
 
                 // Atualiza o conteúdo do modal
-                const titleElement = document.getElementById('noticiaModalTitle');
-                const subtitleElement = document.getElementById('noticiaModalSubtitle');
-                const imageElement = document.getElementById('noticiaModalImage');
-                const contentElement = document.getElementById('noticiaModalContent');
-                const authorElement = document.getElementById('noticiaModalAuthor');
+                const elementoTitulo = document.getElementById('noticiaModalTitle');
+                const elementoSubtitulo = document.getElementById('noticiaModalSubtitle');
+                const elementoImagem = document.getElementById('noticiaModalImage');
+                const elementoConteudo = document.getElementById('noticiaModalContent');
+                const elementoAutor = document.getElementById('noticiaModalAuthor');
 
-                if (titleElement && titulo) titleElement.textContent = titulo;
-                if (subtitleElement && subtitulo) subtitleElement.textContent = subtitulo;
-                if (imageElement && imagem) imageElement.src = imagem;
-                if (contentElement && conteudo) contentElement.textContent = conteudo;
-                if (authorElement && autor) authorElement.textContent = 'Por: ' + autor;
+                if (elementoTitulo && titulo) elementoTitulo.textContent = titulo;
+                if (elementoSubtitulo && subtitulo) elementoSubtitulo.textContent = subtitulo;
+                if (elementoImagem && imagem) elementoImagem.src = imagem;
+                if (elementoConteudo && conteudo) elementoConteudo.textContent = conteudo;
+                if (elementoAutor && autor) elementoAutor.textContent = 'Por: ' + autor;
             }
         });
     }
 
-    // Edição de notícias (apenas para admin)
-document.addEventListener('DOMContentLoaded', function() {
-  // Configura o modal de edição
-  const editarModal = document.getElementById('editarNoticiaModal');
-  if (editarModal) {
-    editarModal.addEventListener('show.bs.modal', function(event) {
-      const button = event.relatedTarget;
-      const noticiaId = button.getAttribute('data-id');
-      
-      // Busca os dados da notícia via AJAX
-      fetch(`/api/noticias/${noticiaId}`)
-        .then(response => response.json())
-        .then(noticia => {
-          document.querySelector('#editarNoticiaForm input[name="titulo"]').value = noticia.titulo;
-          document.querySelector('#editarNoticiaForm select[name="categoria"]').value = noticia.categoria;
-          document.querySelector('#editarNoticiaForm input[name="noticiaId"]').value = noticia.id;
-          document.querySelector('#editarNoticiaForm').action = `/noticia/editar/${noticia.id}`;
+    // Estado ativo dos links da navbar
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function() {
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            this.classList.add('active');
         });
     });
-  }
-  
-  // Configura os links da navbar para filtragem
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', function() {
-      document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-      this.classList.add('active');
-    });
-  });
-});
 
-    // Adiciona estilos dinâmicos para as imagens do carrossel
-    const carouselImages = document.querySelectorAll('.carousel-img');
-    carouselImages.forEach(img => {
+    // Efeitos hover nas imagens do carrossel
+    const imagensCarrossel = document.querySelectorAll('.carousel-img');
+    imagensCarrossel.forEach(img => {
         img.style.cursor = 'pointer';
         img.addEventListener('mouseenter', () => {
             img.style.transform = 'scale(1.02)';
@@ -140,97 +122,96 @@ document.addEventListener('DOMContentLoaded', function() {
             img.style.transform = 'scale(1)';
         });
     });
+
+    // Funcionalidade de edição de cards para admin
+    if (document.body.classList.contains('admin-logged')) {
+        configurarEdicaoDeCards();
+    }
 });
 
-// Edição de cards (apenas para admin)
-if (document.body.classList.contains('admin-logged')) {
-    document.querySelectorAll('.editable-card').forEach(card => {
-        card.style.cursor = 'pointer';
-        card.style.position = 'relative';
-        
-        const editIcon = document.createElement('span');
+// Funções para edição de cards
+function configurarEdicaoDeCards() {
+    document.querySelectorAll('.edit-card-btn').forEach(botao => {
+        botao.addEventListener('click', function() {
+            const idCard = this.getAttribute('data-card-id');
+            const posicao = this.getAttribute('data-card-position');
+            const categoria = this.getAttribute('data-card-category');
+            
+            // Configura o formulário antes de abrir o modal
+            const form = document.getElementById('editCardForm');
+            form.action = `/admin/cards/update/${idCard}`;
+            
+            // Adiciona campo hidden para posição se não existir
+            if (!document.getElementById('editCardPosicao')) {
+                const posicaoInput = document.createElement('input');
+                posicaoInput.type = 'hidden';
+                posicaoInput.name = 'posicao';
+                posicaoInput.id = 'editCardPosicao';
+                posicaoInput.value = posicao;
+                form.appendChild(posicaoInput);
+            } else {
+                document.getElementById('editCardPosicao').value = posicao;
+            }
 
-        editIcon.style.position = 'absolute';
-        editIcon.style.top = '10px';
-        editIcon.style.right = '10px';
-        editIcon.style.background = 'rgba(0,0,0,0.7)';
-        editIcon.style.color = 'white';
-        editIcon.style.padding = '2px 8px';
-        editIcon.style.borderRadius = '4px';
-        editIcon.style.fontSize = '12px';
-        card.appendChild(editIcon);
-
-        card.addEventListener('click', function(e) {
-            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target === editIcon) return;
-            
-            const cardId = this.dataset.cardId;
-            const cardTitle = this.querySelector('.card-title').textContent;
-            
-            // Coleta todos os parágrafos de conteúdo
-            const paragraphs = Array.from(this.querySelectorAll('.card-text'));
-            const cardContent = paragraphs.map(p => p.textContent).join('\n');
-            
-            const cardImage = this.querySelector('img')?.src || '';
-
-            // Preenche o modal de edição
-            document.getElementById('editCardId').value = cardId;
-            document.getElementById('editCardTitle').value = cardTitle;
-            document.getElementById('editCardContent').value = cardContent;
-            document.getElementById('currentCardImage').src = cardImage;
-            
-            // Atualiza o action do form com o ID correto
-            document.getElementById('editCardForm').action = `/admin/cards/update/${cardId}`;
-            
-            // Abre o modal
-            const modal = new bootstrap.Modal(document.getElementById('editCardModal'));
-            modal.show();
+            abrirModalEditarCard(idCard, posicao, categoria);
         });
     });
-
-    // Configura o modal de edição de cards
-    const editCardModal = document.getElementById('editCardModal');
-    if (editCardModal) {
-        editCardModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            if (button) {
-                const cardId = button.getAttribute('data-card-id');
-                const cardTitle = button.getAttribute('data-card-title');
-                const cardContent = button.getAttribute('data-card-content');
-                const cardImage = button.getAttribute('data-card-image');
-
-                document.getElementById('editCardId').value = cardId;
-                document.getElementById('editCardTitle').value = cardTitle;
-                document.getElementById('editCardContent').value = cardContent;
-                document.getElementById('currentCardImage').src = cardImage;
-                document.getElementById('editCardForm').action = `/admin/cards/update/${cardId}`;
-            }
-        });
-    }
 }
 
-function abrirModalNovoCard(categoria) {
-    document.getElementById('editCardId').value = '';
-    document.getElementById('editCardCategoria').value = categoria;
-    document.getElementById('editCardTitle').value = '';
-    document.getElementById('editCardContent').value = '';
-    document.getElementById('currentCardImage').src = '';
-    document.getElementById('editCardForm').action = '/admin/cards/update/blank-1';
+function abrirModalEditarCard(idCard, posicao, categoria) {
+    const form = document.getElementById('editCardForm');
+    
+    if (idCard.startsWith('blank')) {
+        // Novo card
+        form.reset();
+        document.getElementById('editCardId').value = `blank-${posicao}`;
+        document.getElementById('editCardCategoria').value = categoria;
+        document.getElementById('currentCardImage').src = '';
+    } else {
+        // Card existente
+        fetch(`/admin/cards/${idCard}`)
+            .then(resposta => {
+                if (!resposta.ok) throw new Error('Card não encontrado');
+                return resposta.json();
+            })
+            .then(card => {
+                document.getElementById('editCardId').value = card.id;
+                document.getElementById('editCardTitle').value = card.titulo || '';
+                document.getElementById('editCardSubtitle').value = card.subtitulo || '';
+                document.getElementById('editCardCategoria').value = card.categoria || '';
+                document.getElementById('editCardContent').value = 
+                    Array.isArray(card.conteudo) ? card.conteudo.join('\n') : card.conteudo || '';
+                document.getElementById('currentCardImage').src = card.imagem || '';
+            })
+            .catch(erro => {
+                console.error('Erro ao buscar card:', erro);
+                alert('Erro ao carregar card');
+            });
+    }
+    
+    // Configura categoria
+    const categoriaSelect = document.getElementById('editCardCategoria');
+    categoriaSelect.disabled = !idCard.startsWith('blank');
+    if (idCard.startsWith('blank')) {
+        categoriaSelect.value = categoria;
+    }
+    
+    // Mostra o modal
     const modal = new bootstrap.Modal(document.getElementById('editCardModal'));
     modal.show();
 }
 
-function abrirModalEditarCard(cardId) {
-    fetch(`/admin/cards/${cardId}`)
-        .then(res => res.json())
-        .then(card => {
-            document.getElementById('editCardId').value = card.id;
-            document.getElementById('editCardTitle').value = card.titulo || '';
-            document.getElementById('editCardSubtitle').value = card.subtitulo || '';
-            document.getElementById('editCardCategoria').value = card.categoria || '';
-            document.getElementById('editCardContent').value = (Array.isArray(card.conteudo) ? card.conteudo.join('\n') : '');
-            document.getElementById('currentCardImage').src = card.imagem || '';
-            document.getElementById('editCardForm').action = `/admin/cards/update/${card.id}`;
-            const modal = new bootstrap.Modal(document.getElementById('editCardModal'));
-            modal.show();
-        });
+// Função para abrir modal de novo card
+function abrirModalNovoCard(categoria, posicao = 1) {
+    document.getElementById('editCardId').value = `blank-${posicao}`;
+    document.getElementById('editCardTitle').value = '';
+    document.getElementById('editCardSubtitle').value = '';
+    document.getElementById('editCardContent').value = '';
+    document.getElementById('currentCardImage').src = '';
+    document.getElementById('editCardCategoria').value = categoria;
+    document.getElementById('editCardPosicao').value = posicao;
+    document.getElementById('editCardCategoria').disabled = false;
+    
+    const modal = new bootstrap.Modal(document.getElementById('editCardModal'));
+    modal.show();
 }

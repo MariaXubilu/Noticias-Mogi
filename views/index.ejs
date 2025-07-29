@@ -65,34 +65,38 @@
 
                     <!-- Cards Secundários (em grid 2x3) -->
                     <div class="row">
-                        <% if (cards && cards.length > 1) { %>
-                            <% for (let i = 1; i <= 6 && i < cards.length; i++) { %>
-                                <div class="col-md-6 mb-4">
-                                    <div class="card h-100 editable-card" data-card-id="<%= cards[i].id %>">
-                                        <img src="<%= cards[i].imagem || '/images/default.jpg' %>" class="card-img-top news-image">
-                                        <div class="card-body">
-                                            <h5 class="card-title"><%= cards[i].titulo %></h5>
-                                            <% if (cards[i].conteudo && Array.isArray(cards[i].conteudo) && cards[i].conteudo[0]) { %>
-                                                <p class="card-text d-none d-md-block"><%= cards[i].conteudo[0] %></p>
-                                            <% } %>
+                        <% for (let i = 1; i <= 6; i++) { %>
+                            <% const card = cards[i] || { id: `blank-${i}`, titulo: '', subtitulo: '', imagem: '', conteudo: [], categoria: categoriaSelecionada || '' }; %>
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 <%= card.titulo ? '' : 'border-dashed' %> editable-card" 
+                                     data-card-id="<%= card.id %>">
+                                    
+                                    <% if (card.imagem) { %>
+                                        <img src="<%= card.imagem %>" class="card-img-top news-image" style="height: 150px; object-fit: cover;">
+                                    <% } else { %>
+                                        <div class="card-img-top bg-light d-flex justify-content-center align-items-center" style="height: 150px;">
+                                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
                                         </div>
+                                    <% } %>
+                                    
+                                    <div class="card-body">
+                                        <h5 class="card-title"><%= card.titulo || 'Novo Card' %></h5>
+                                        
+                                        <% if (card.conteudo && card.conteudo[0]) { %>
+                                            <p class="card-text d-none d-md-block"><%= card.conteudo[0] %></p>
+                                        <% } %>
+                                        
+                                        <% if (user && user.isAdmin) { %>
+                                            <button class="btn btn-outline-primary btn-sm mt-2 edit-card-btn"
+                                                    data-card-id="<%= card.id %>"
+                                                    data-card-position="<%= i %>"
+                                                    data-card-category="<%= card.categoria %>">
+                                                <%= card.titulo ? 'Editar' : 'Adicionar' %>
+                                            </button>
+                                        <% } %>
                                     </div>
                                 </div>
-                            <% } %>
-                        <% } else if (categoriaSelecionada) { %>
-                            <% for (let i = 1; i <= 6; i++) { %>
-                                <div class="col-md-6 mb-4">
-                                    <div class="card h-100 editable-card border-dashed" data-card-id="blank-<%= i %>">
-                                        <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 200px;">
-                                            <p class="text-muted mb-2">Nenhuma notícia para esta categoria.</p>
-                                            <% if (user && user.isAdmin) { %>
-                                                <!-- Para adicionar card (fluxo atual, correto para cards) -->
-<button class="btn btn-outline-primary btn-sm" onclick="abrirModalNovoCard('<%= categoriaSelecionada %>')">Adicionar notícia</button>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                </div>
-                            <% } %>
+                            </div>
                         <% } %>
                     </div>
                 <% } else { %>
@@ -106,7 +110,6 @@
                             <p class="card-text fs-5">Impacto no orçamento da União é de R$ 27 bilhões por ano.</p>
                         </div>
                     </div>
-
                 <% } %>
 
                 <% if (!categoriaSelecionada && cardsAleatorios && cardsAleatorios.length > 0) { %>
@@ -125,22 +128,6 @@
                                 </div>
                             </div>
                         <% }); %>
-                    </div>
-                <% } else if (categoriaSelecionada) { %>
-                    <!-- Cards em branco editáveis por categoria (NÃO MEXA) -->
-                    <div class="row">
-                        <% for (let i = 1; i <= 6; i++) { %>
-                            <div class="col-md-6 mb-4">
-                                <div class="card h-100 editable-card border-dashed" data-card-id="blank-<%= i %>">
-                                    <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 200px;">
-                                        <p class="text-muted mb-2">Nenhuma notícia para esta categoria.</p>
-                                        <% if (user && user.isAdmin) { %>
-                                            <button class="btn btn-outline-primary btn-sm" onclick="abrirModalNovoCard('<%= categoriaSelecionada %>')">Adicionar notícia</button>
-                                        <% } %>
-                                    </div>
-                                </div>
-                            </div>
-                        <% } %>
                     </div>
                 <% } %>
             </div>
@@ -262,56 +249,57 @@
 
     <!-- Modal de edição de cards (apenas para admin) -->
     <% if (user && user.isAdmin) { %>
-<div class="modal fade" id="editCardModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="editCardForm" method="POST" enctype="multipart/form-data">
-                <input type="hidden" id="editCardId" name="id">
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Card</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Imagem Atual</label>
-                        <img id="currentCardImage" src="" class="img-fluid mb-2" style="max-height: 150px;">
-                        <label class="form-label">Nova Imagem (opcional)</label>
-                        <input type="file" class="form-control" name="imagem" accept="image/*">
+    <div class="modal fade" id="editCardModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="editCardForm" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" id="editCardId" name="id">
+                    <input type="hidden" id="editCardPosicao" name="posicao">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar Card</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Título</label>
-                        <input type="text" class="form-control" id="editCardTitle" name="titulo" required>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Imagem Atual</label>
+                            <img id="currentCardImage" src="" class="img-fluid mb-2" style="max-height: 150px;">
+                            <label class="form-label">Nova Imagem (opcional)</label>
+                            <input type="file" class="form-control" name="imagem" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Título</label>
+                            <input type="text" class="form-control" id="editCardTitle" name="titulo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Subtítulo</label>
+                            <input type="text" class="form-control" id="editCardSubtitle" name="subtitulo">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Categoria</label>
+                            <select class="form-select" id="editCardCategoria" name="categoria" required>
+                                <option value="">Selecione...</option>
+                                <option value="politica">Política</option>
+                                <option value="esportes">Esportes</option>
+                                <option value="cultura">Cultura</option>
+                                <option value="economia">Economia</option>
+                                <option value="tecnologia">Tecnologia</option>
+                                <option value="agronegocio">Agronegócio</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Conteúdo (um parágrafo por linha)</label>
+                            <textarea class="form-control" id="editCardContent" name="conteudo" rows="5"></textarea>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Subtítulo</label>
-                        <input type="text" class="form-control" id="editCardSubtitle" name="subtitulo">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Categoria/ID</label>
-                        <select class="form-select" id="editCardCategoria" name="categoria" required>
-                            <option value="">Selecione...</option>
-                            <option value="politica">Política</option>
-                            <option value="esportes">Esportes</option>
-                            <option value="cultura">Cultura</option>
-                            <option value="economia">Economia</option>
-                            <option value="tecnologia">Tecnologia</option>
-                            <option value="agronegocio">Agronegócio</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Conteúdo (um parágrafo por linha)</label>
-                        <textarea class="form-control" id="editCardContent" name="conteudo" rows="5"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<% } %>
+    <% } %>
 
     <%- include('partials/footer') %>
 
@@ -331,4 +319,50 @@
             }, 2000);
         </script>
     <% } %>
+
+    <script>
+        // Event listeners para os botões de edição
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.edit-card-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const cardId = this.getAttribute('data-card-id');
+                    const position = this.getAttribute('data-card-position');
+                    const category = this.getAttribute('data-card-category');
+                    
+                    if (cardId.startsWith('blank')) {
+                        // Novo card
+                        document.getElementById('editCardId').value = `blank-${position}`;
+                        document.getElementById('editCardTitle').value = '';
+                        document.getElementById('editCardSubtitle').value = '';
+                        document.getElementById('editCardContent').value = '';
+                        document.getElementById('currentCardImage').src = '';
+                        document.getElementById('editCardCategoria').value = category;
+                        document.getElementById('editCardPosicao').value = position;
+                    } else {
+                        // Editar card existente
+                        fetch(`/admin/cards/${cardId}`)
+                            .then(res => res.json())
+                            .then(card => {
+                                document.getElementById('editCardId').value = card.id;
+                                document.getElementById('editCardTitle').value = card.titulo || '';
+                                document.getElementById('editCardSubtitle').value = card.subtitulo || '';
+                                document.getElementById('editCardCategoria').value = card.categoria || '';
+                                document.getElementById('editCardPosicao').value = position;
+                                document.getElementById('editCardContent').value = 
+                                    Array.isArray(card.conteudo) ? card.conteudo.join('\n') : '';
+                                document.getElementById('currentCardImage').src = card.imagem || '';
+                            });
+                    }
+                    
+                    // Desabilita a mudança de categoria para cards existentes
+                    if (!cardId.startsWith('blank')) {
+                        document.getElementById('editCardCategoria').disabled = true;
+                    }
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('editCardModal'));
+                    modal.show();
+                });
+            });
+        });
+    </script>
 </body>
