@@ -12,6 +12,28 @@ declare module 'express-session' {
   }
 }
 
+// Middleware para adicionar dados úteis a todas as views
+export const viewDataMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.locals.currentPath = req.path;
+    res.locals.currentQuery = req.query;
+    
+    // Garante que user sempre exista, mesmo que seja null
+    res.locals.user = null;
+    
+    if (req.session.userId) {
+      const user = await User.findByPk(req.session.userId);
+      if (user) {
+        res.locals.user = user.get({ plain: true }); // Converte para objeto simples
+      }
+    }
+    next();
+  } catch (error) {
+    console.error('Error in viewDataMiddleware:', error);
+    next(error);
+  }
+};
+
 export const requireLogin = (req: Request, res: Response, next: NextFunction) => {
   if (!req.session.userId) {
     res.redirect('/login');
@@ -29,7 +51,6 @@ export const isAdmin = async (req: Request, res: Response, next: NextFunction) =
     }
     next();
   } catch (error) {
-    console.error('Erro no middleware isAdmin:', error);
-    res.status(500).send('Erro interno');
+    next(error);
   }
 };

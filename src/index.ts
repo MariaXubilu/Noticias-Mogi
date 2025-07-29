@@ -11,7 +11,13 @@ import bcrypt from 'bcrypt';
 import { sequelize, Op } from './config/database';
 import { DataTypes, Model } from 'sequelize';
 import { register, login, logout, updateProfile } from './controllers/userController';
-// Modelos com tipagemm
+import { viewDataMiddleware, requireLogin, isAdmin } from './middleware/authMiddleware';
+
+// Crie a instância do Express
+const app = express();
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 4000;
+
+// Modelos com tipagem
 interface UserAttributes {
   id?: number;
   username: string;
@@ -104,19 +110,13 @@ if (typeof Noticia.associate === 'function') {
   Noticia.associate({ User });
 }
 
-// Middlewares
-import { requireLogin, isAdmin } from './middleware/authMiddleware';
-
-const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 4000;
-
 // Configurações do Express
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
-// Middlewares
+// Middlewares BÁSICOS primeiro
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(session({
@@ -128,6 +128,19 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000 // 1 dia
     }
 }));
+
+// Middlewares que dependem da sessão
+app.use(viewDataMiddleware);
+// Adicione isso após o middleware de sessão
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (!req.session) {
+    console.error('Session middleware not loaded!');
+    res.status(500).send('Server configuration error');
+    return; 
+  }
+  next();
+});
 
 // Configuração do Nodemailer
 interface MailOptions {
@@ -177,21 +190,6 @@ const upload = multer({
   }
 });
 
-// Middleware de usuário logado com tipagem
-app.use(async (req: Request, res: Response, next: NextFunction) => {
-    res.locals.user = null;
-    if (req.session.userId) {
-        try {
-            const user = await User.findByPk(req.session.userId) as UserInstance;
-            if (user) {
-                res.locals.user = user;
-            }
-        } catch (error) {
-            console.error('Erro ao buscar usuário:', error);
-        }
-    }
-    next();
-});
 
 // Função de validação de CPF
 function validarCPF(cpfDigits: string): boolean {

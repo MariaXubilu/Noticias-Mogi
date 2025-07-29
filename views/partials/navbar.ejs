@@ -54,14 +54,28 @@
                     </div>
                     
                     <ul class="navbar-nav mx-auto"> 
-                        <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/?categoria=politica">Política</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/?categoria=esportes">Esportes</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/?categoria=cultura">Cultura</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/?categoria=economia">Economia</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/?categoria=tecnologia">Tecnologia</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/?categoria=agronegocio">Agronegócio</a></li>
-                    </ul>
+    <li class="nav-item">
+        <a class="nav-link <%= currentPath === '/' && !currentQuery.categoria ? 'active' : '' %>" href="/">Home</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <%= currentQuery.categoria === 'politica' ? 'active' : '' %>" href="/?categoria=politica">Política</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <%= currentQuery.categoria === 'esportes' ? 'active' : '' %>" href="/?categoria=esportes">Esportes</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <%= currentQuery.categoria === 'cultura' ? 'active' : '' %>" href="/?categoria=cultura">Cultura</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <%= currentQuery.categoria === 'economia' ? 'active' : '' %>" href="/?categoria=economia">Economia</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <%= currentQuery.categoria === 'tecnologia' ? 'active' : '' %>" href="/?categoria=tecnologia">Tecnologia</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <%= currentQuery.categoria === 'agronegocio' ? 'active' : '' %>" href="/?categoria=agronegocio">Agronegócio</a>
+    </li>
+</ul>
                 </div>
             </div>
         </div>
